@@ -749,9 +749,10 @@ st.markdown("""
         <span class="gemini-badge">✨ Powered by Google Gemini AI</span>
     </div>
     <div style="margin-top:0.8rem;">
+        <span class="sdg-badge">🟣 SDG 5 — Gender Equality</span>
         <span class="sdg-badge">🔵 SDG 8 — Decent Work</span>
         <span class="sdg-badge">🟢 SDG 10 — Reduced Inequalities</span>
-        <span class="sdg-badge">🔴 SDG 16 — Justice</span>
+        <span class="sdg-badge">🔴 SDG 16 — Justice & Accountability</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1144,7 +1145,7 @@ if df is not None:
                     </ul>
                     <p style="color:#0a6b5e;font-weight:600;">
                         Reweighing + Gemini AI ne bias reduce kar diya.
-                        Yeh tool SDG 8, SDG 10, aur SDG 16 ko directly support karta hai.
+                        Yeh tool SDG 5, SDG 8, SDG 10, aur SDG 16 ko directly support karta hai.
                         BV TechFusion 2026 — Track 02: People & Society.
                     </p>
                 </div>""", unsafe_allow_html=True)
@@ -1194,7 +1195,7 @@ st.markdown("""
     <strong>⚖️ Unbiased AI Decision Tool</strong> — BV TechFusion 2026<br>
     Team Solvation | Anshu Raj Verma (ECE 1st Year) &amp; Anjani (ECE 2nd Year)<br>
     Track 02 — People &amp; Society | Digital Society &amp; Governance<br>
-    SDG 8 | SDG 10 | SDG 16<br>
+    SDG 5 | SDG 8 | SDG 10 | SDG 16<br>
     <strong>Powered by Google Gemini AI + IBM AIF360</strong><br>
     <em>"AI khud biased nahi hota — wo data ka bias reflect karta hai.
     Hum usse visible aur fixable bana rahe hain."</em>
