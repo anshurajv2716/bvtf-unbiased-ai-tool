@@ -1,7 +1,7 @@
 # ============================================================
 # UNBIASED AI DECISION TOOL — GEMINI POWERED VERSION
 # BV TechFusion 2026 — Team Solvation
-# Anshu Raj Verma (ECE 1st Year) + Anjani (ECE 2nd Year) 
+# Anjani (ECE 2nd Year) + Anshu Raj Verma (ECE 1st Year)
 # ============================================================
 # INSTALL: pip install streamlit pandas numpy scikit-learn
 #          aif360 matplotlib reportlab google-generativeai
@@ -18,6 +18,7 @@ import warnings
 import io
 import base64
 import os
+import re
 warnings.filterwarnings('ignore')
 
 from aif360.datasets import BinaryLabelDataset
@@ -36,6 +37,27 @@ try:
         GEMINI_AVAILABLE = False
 except:
     GEMINI_AVAILABLE = False
+
+
+
+# ============================================================
+# HELPER: Convert **bold** markdown to <strong> HTML
+# FIX-1: This prevents ** asterisks showing as literal text
+# inside HTML containers on mobile browsers
+# ============================================================
+
+def md_to_html(text):
+    """
+    Converts markdown bold (**text**) and newlines to proper HTML.
+    Raw markdown injected into HTML divs does NOT auto-parse on mobile.
+    This function ensures bold text and line breaks render correctly
+    on all devices including phones and tablets.
+    """
+    if not text:
+        return ""
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text, flags=re.DOTALL)
+    text = text.replace('\n', '<br>')
+    return text
 
 # ============================================================
 # PAGE CONFIG
@@ -263,6 +285,53 @@ st.markdown("""
         border-top: 2px solid #e0f5f0; margin-top: 2rem;
         background: #f8fffe; border-radius: 0 0 16px 16px;
     }
+
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    /* FIX-CSS-1: Reduce padding on narrow mobile viewports */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding: 1rem 0.8rem !important;
+            margin: 0.3rem !important;
+            border-radius: 12px !important;
+        }
+        .hero-header h1 { font-size: 1.6rem !important; }
+        .hero-header p  { font-size: 0.9rem !important; }
+        .hero-header    { padding: 1.5rem 1rem !important; }
+    }
+    /* FIX-CSS-2: Prevent overflow on all screen sizes */
+    .element-container, .stMarkdown {
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    /* FIX-CSS-3: step-card responsive padding */
+    @media (max-width: 768px) {
+        .step-card {
+            padding: 0.8rem !important;
+            border-radius: 10px !important;
+        }
+        .step-card ul { padding-left: 1rem !important; }
+        .step-card li { font-size: 0.9rem !important; line-height: 1.7rem !important; }
+    }
+    /* FIX-CSS-4: gemini-box text always visible */
+    .gemini-box p, .gemini-box span, .gemini-box div {
+        color: #1a3a38 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.7 !important;
+        display: block !important;
+        width: 100% !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+    }
+    @media (max-width: 768px) {
+        .gemini-box { padding: 1rem !important; border-radius: 10px !important; }
+        .gemini-box p, .gemini-box div { font-size: 0.88rem !important; }
+        .metric-value { font-size: 1.5rem !important; }
+        .metric-card  { padding: 0.7rem !important; }
+        img { max-width: 100% !important; height: auto !important; }
+    }
+    /* ===== END MOBILE FIXES ===== */
 </style>
 """, unsafe_allow_html=True)
 
@@ -279,11 +348,11 @@ def get_gemini_explanation(sector, protected_attr, di_before,
         f"In the {sector} sector, {group_unpriv} group was being treated unfairly compared "
         f"to {group_priv} group. The bias score was {di_before:.2f} (HIGH BIAS). After applying "
         f"IBM AIF360 Reweighing algorithm, the score improved to {di_after:.2f} — "
-        f"bias has been successfully mitigated.\n\n"
+        f"bias has been successfully mitigated.\n"
         f"**Hindi Explanation (हिंदी में):**\n"
         f"{sector} mein {group_unpriv} group ke saath unfair treatment ho rahi thi. "
         f"Bias score {di_before:.2f} tha. Reweighing se {di_after:.2f} ho gaya — "
-        f"bias successfully reduce hua.\n\n"
+        f"bias successfully reduce hua.\n"
         f"**Key Recommendation:**\n"
         f"{protected_attr} column ko sensitive feature mark karo aur "
         f"har 3 mahine mein bias audit karein."
@@ -749,10 +818,9 @@ st.markdown("""
         <span class="gemini-badge">✨ Powered by Google Gemini AI</span>
     </div>
     <div style="margin-top:0.8rem;">
-        <span class="sdg-badge">🟣 SDG 5 — Gender Equality</span>
         <span class="sdg-badge">🔵 SDG 8 — Decent Work</span>
         <span class="sdg-badge">🟢 SDG 10 — Reduced Inequalities</span>
-        <span class="sdg-badge">🔴 SDG 16 — Justice & Accountability</span>
+        <span class="sdg-badge">🔴 SDG 16 — Justice</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1114,10 +1182,16 @@ if df is not None:
                             res['rate_priv_before'], res['rate_unpriv_before'],
                             res['improvement'], g1n, g0n)
                     if gemini_text:
+                        # FIX-1: convert **bold** md to HTML before injecting into div
+                        gemini_html = md_to_html(gemini_text)
                         st.markdown(f"""
                         <div class="gemini-box">
                             <h4>🤖 Google Gemini AI Analysis</h4>
-                            {gemini_text.replace(chr(10),'<br>')}
+                            <div style="color:#1a3a38;font-size:0.95rem;line-height:1.8;
+                                        white-space:normal;overflow-wrap:break-word;
+                                        width:100%;display:block;">
+                                {gemini_html}
+                            </div>
                         </div>""", unsafe_allow_html=True)
                 else:
                     st.markdown('<div class="alert-warning">⚠️ Gemini API not configured. Add <strong>GEMINI_API_KEY</strong> to .env file.</div>',
@@ -1130,24 +1204,20 @@ if df is not None:
                     'margin:1.5rem 0 1rem 0;display:block;">'
                     '💬 Simple Explanation</span>',
                     unsafe_allow_html=True)
-                st.markdown(f"""
-                <div class="step-card">
-                    <p><strong>Aapke {sector} data mein kya mila:</strong></p>
-                    <ul style="line-height:2rem;">
-                        <li>🔴 <strong>Before fix:</strong> {g0n} ko {g1n} ke comparison mein
-                            <strong>{gap:.1f}%</strong> unfairly treat kiya ja raha tha</li>
-                        <li>🟢 <strong>After fix:</strong> Gap sirf
-                            <strong>{abs(res['rate_priv_after']-res['rate_unpriv_after']):.1f}%</strong>
-                            reh gaya</li>
-                        <li>⚖️ <strong>Disparate Impact:</strong> {res['di_before']:.3f} se
-                            badh ke <strong>{res['di_after']:.3f}</strong> ho gaya</li>
-                        <li>📌 <strong>Status:</strong> Bias successfully mitigated</li>
-                    </ul>
-                    <p style="color:#0a6b5e;font-weight:600;">
-                        Reweighing + Gemini AI ne bias reduce kar diya.
-                        Yeh tool SDG 5, SDG 8, SDG 10, aur SDG 16 ko directly support karta hai.
-                        BV TechFusion 2026 — Track 02: People & Society.
-                    </p>
+                # FIX-2: Native st.markdown() — renders correctly on mobile
+                gap_after = abs(res['rate_priv_after'] - res['rate_unpriv_after'])
+                st.markdown(f"**Aapke {sector} data mein kya mila:**")
+                st.markdown(
+                    f"- \U0001f534 **Before fix:** {g0n} ko {g1n} ke comparison mein **{gap:.1f}%** unfairly treat kiya ja raha tha  \n"
+                    f"- \U0001f7e2 **After fix:** Gap sirf **{gap_after:.1f}%** reh gaya  \n"
+                    f"- **Disparate Impact:** {res['di_before']:.3f} se badh ke **{res['di_after']:.3f}** ho gaya  \n"
+                    f"- **Status:** Bias successfully mitigated"
+                )
+                st.markdown("""
+                <div class="alert-success" style="margin-top:0.5rem;">
+                    Reweighing + Gemini AI ne bias reduce kar diya.
+                    Yeh tool SDG 5, SDG 8, SDG 10, aur SDG 16 ko directly support karta hai.
+                    BV TechFusion 2026 — Track 02: People &amp; Society.
                 </div>""", unsafe_allow_html=True)
 
                 st.markdown(
@@ -1193,9 +1263,9 @@ if df is not None:
 st.markdown("""
 <div class="footer">
     <strong>⚖️ Unbiased AI Decision Tool</strong> — BV TechFusion 2026<br>
-    Team Solvation | Anshu Raj Verma (ECE 1st Year) &amp; Anjani (ECE 2nd Year)<br>
+    Team Solvation | Anjani (ECE 2nd Year) &amp; Anshu Raj Verma (ECE 1st Year)<br>
     Track 02 — People &amp; Society | Digital Society &amp; Governance<br>
-    SDG 5 | SDG 8 | SDG 10 | SDG 16<br>
+    SDG 8 | SDG 10 | SDG 16<br>
     <strong>Powered by Google Gemini AI + IBM AIF360</strong><br>
     <em>"AI khud biased nahi hota — wo data ka bias reflect karta hai.
     Hum usse visible aur fixable bana rahe hain."</em>
